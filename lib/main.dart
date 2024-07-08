@@ -125,7 +125,6 @@
 // }
 
 import 'package:flutter/material.dart';
-import 'themes/one_dark_pro_theme.dart';
 import 'pages/log_monitor_page.dart';
 
 void main() {
@@ -135,9 +134,8 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UDP Log Monitor',
-      theme: OneDarkProTheme.themeData,
+    return const MaterialApp(
+      title: 'HAND APP',
       home: LogMonitorPage(),
       debugShowCheckedModeBanner: false, // disable the 'debug' banner
     );
