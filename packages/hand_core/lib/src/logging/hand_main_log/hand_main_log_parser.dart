@@ -1,5 +1,4 @@
 import 'hand_main_log_message.dart';
-import 'package:fixnum/fixnum.dart';
 // import 'package:logger/logger.dart';
 
 // // debug usage
@@ -11,17 +10,17 @@ class HandMainLogParser {
   HandMainLogLevel parseLogLevel(String log) {
     switch (log[0]) {
       case 'E':
-        return HandMainLogLevel.error;
+        return HandMainLogLevel(HandMainLogLevelType.error);
       case 'W':
-        return HandMainLogLevel.warn;
+        return HandMainLogLevel(HandMainLogLevelType.warn);
       case 'I':
-        return HandMainLogLevel.info;
+        return HandMainLogLevel(HandMainLogLevelType.info);
       case 'D':
-        return HandMainLogLevel.debug;
+        return HandMainLogLevel(HandMainLogLevelType.debug);
       case 'V':
-        return HandMainLogLevel.verbose;
+        return HandMainLogLevel(HandMainLogLevelType.verbose);
       default:
-        return HandMainLogLevel.info;
+        return HandMainLogLevel(HandMainLogLevelType.info);
     }
   }
 
@@ -38,7 +37,7 @@ class HandMainLogParser {
     Match? match = regex.firstMatch(cleanedLog);
 
     if (match != null) {
-      Int64 timestamp = Int64.parseInt(match.group(1)!);
+      int timestamp = int.parse(match.group(1)!);
       String source = match.group(2)!;
       String message = match.group(3)!;
 
@@ -54,7 +53,7 @@ class HandMainLogParser {
     } else {
       return HandMainLogMessage(
         message: cleanedLog,
-        timestamp: Int64(0),
+        timestamp: 0,
         level: level,
         source: 'unknown',
       );

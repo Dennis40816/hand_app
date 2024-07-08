@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hand_core/hand_core.dart';
-import '../themes/one_dark_pro_theme.dart';
+import 'package:provider/provider.dart';
+
+import 'package:hand_app/states/log/log_data_state.dart';
+import 'package:hand_app/components/terminal/terminal_window_settings_interface.dart';
+import 'package:hand_app/states/terminal/terminal_window_settings_state.dart';
 
 class TerminalWindow extends StatefulWidget {
   final HandMainUdpLogReceiver udpLogReceiver;

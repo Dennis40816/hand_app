@@ -1,39 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:hand_core/hand_core.dart';
-import '../components/terminal_window.dart';
+import 'package:hand_app/components/hand/hand_log_terminal.dart';
 
-class LogMonitorPage extends StatefulWidget {
-  @override
-  _LogMonitorPageState createState() => _LogMonitorPageState();
-}
-
-class _LogMonitorPageState extends State<LogMonitorPage> {
-  final HandMainUdpLogReceiver _udpLogReceiver =
-      HandMainUdpLogReceiver(port: 12345);
-  int _maxLines = 500; // Default max lines
-
-  @override
-  void initState() {
-    super.initState();
-    _udpLogReceiver.startListening();
-  }
-
-  @override
-  void dispose() {
-    _udpLogReceiver.dispose();
-    super.dispose();
-  }
-
+class LogMonitorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('HAND MAIN UDP Log Monitor'),
       ),
-      body: Stack(
+      body: const Stack(
         children: [
-          const Center(child: Text('Main Content Here')),
-          TerminalWindow(udpLogReceiver: _udpLogReceiver, maxLines: _maxLines),
+          Center(child: Text('Main Content Here')),
+          HandLogTerminal(udpPort: 12345),
         ],
       ),
     );

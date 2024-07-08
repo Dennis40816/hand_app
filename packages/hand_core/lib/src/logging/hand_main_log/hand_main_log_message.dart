@@ -1,10 +1,39 @@
-import 'dart:ffi';
-import 'package:fixnum/fixnum.dart';
+import '../../model/log_message_interface.dart';
 
-class HandMainLogMessage {
+enum HandMainLogLevelType { info, warn, error, debug, verbose }
+
+class HandMainLogLevel implements LogLevel {
+  final HandMainLogLevelType type;
+
+  HandMainLogLevel(this.type);
+
+  @override
+  String getLevelString() {
+    switch (type) {
+      case HandMainLogLevelType.error:
+        return "ERROR";
+      case HandMainLogLevelType.warn:
+        return "WARN";
+      case HandMainLogLevelType.info:
+        return "INFO";
+      case HandMainLogLevelType.debug:
+        return "DEBUG";
+      case HandMainLogLevelType.verbose:
+        return "VERBOSE";
+      default:
+        return "INFO";
+    }
+  }
+}
+
+class HandMainLogMessage implements LogMessage<HandMainLogLevel> {
+  @override
   final String message;
+  @override
   final String source;
-  final Int64 timestamp;
+  @override
+  final int timestamp;
+  @override
   final HandMainLogLevel level;
 
   HandMainLogMessage({
@@ -13,6 +42,9 @@ class HandMainLogMessage {
     required this.timestamp,
     required this.level,
   });
-}
 
-enum HandMainLogLevel { info, warn, error, debug, verbose }
+  @override
+  String getLevelString() {
+    return level.getLevelString();
+  }
+}
