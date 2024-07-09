@@ -35,23 +35,19 @@ class HandLogTerminal extends StatefulWidget {
 }
 
 class _HandLogTerminalState extends State<HandLogTerminal> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      final controller =
-          Provider.of<HandLogTerminalController>(context, listen: false);
-      controller.setGetStyleFunction(widget.getStyle);
+  late HandLogTerminalController controller;
 
-      /// where we start our udp receiver
-      controller.startUdpReceiver();
-    });
+  /// context is available in didChangeDependencies but not in initState.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller = Provider.of<HandLogTerminalController>(context, listen: false);
+    controller.setGetStyleFunction(widget.getStyle);
+    controller.startUdpReceiver();
   }
 
   @override
   void dispose() {
-    final controller =
-        Provider.of<HandLogTerminalController>(context, listen: false);
     controller.stopUdpReceiver();
     super.dispose();
   }
