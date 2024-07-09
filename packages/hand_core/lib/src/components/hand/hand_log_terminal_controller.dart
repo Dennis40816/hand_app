@@ -22,8 +22,8 @@ class HandLogTerminalController extends TerminalController {
           TextSpan(text: message.toString(), style: getStyle(message.level)));
     }
     messageQueue.clear();
-    terminalData.textSpanList.addAll(newSpans);
-    notifyListeners();
+    addTextSpanList(newSpans);
+    // notifyListeners();
   }
 
   /// Starts the UDP receiver and listens for incoming messages.

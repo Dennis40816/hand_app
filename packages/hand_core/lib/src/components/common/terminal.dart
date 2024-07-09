@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'terminal_controller.dart';
 import '../../themes/theme_interface.dart';
@@ -141,11 +140,11 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
     return Expanded(
       child: ListView.builder(
         controller: _scrollController,
-        itemCount: terminalController.terminalData.textSpanList.length,
+        itemCount: terminalController.terminalData.length,
         itemBuilder: (context, index) {
           return SelectableText.rich(
             _applyFontSize(
-              terminalController.terminalData.textSpanList[index],
+              terminalController.terminalData.data[index],
               terminalController.fontSize,
             ),
           );

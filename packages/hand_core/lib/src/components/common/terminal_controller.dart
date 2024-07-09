@@ -7,13 +7,19 @@ class TerminalController extends ChangeNotifier {
 
   /// Adds a new TextSpan to the list and notifies listeners.
   void addTextSpan(TextSpan textSpan) {
-    terminalData.textSpanList.add(textSpan);
+    terminalData.data.add(textSpan);
+    notifyListeners();
+  }
+
+  /// Add a new TextSpan List to the list and notifies listeners.
+  void addTextSpanList(List<TextSpan> list) {
+    terminalData.data.addAll(list);
     notifyListeners();
   }
 
   /// Clears all TextSpans from the list and notifies listeners.
   void clear() {
-    terminalData.textSpanList.clear();
+    terminalData.data.clear();
     notifyListeners();
   }
 

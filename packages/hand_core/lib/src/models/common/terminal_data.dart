@@ -4,6 +4,10 @@ class TerminalData {
   List<TextSpan> textSpanList;
   int maxTextSpanNum;
 
+  /// get
+  int get length => textSpanList.length;
+  List<TextSpan> get data => textSpanList;
+
   TerminalData({required this.textSpanList, this.maxTextSpanNum = 500});
 
   /// Updates the maximum number of TextSpans and removes excess TextSpans if necessary.
