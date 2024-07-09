@@ -22,6 +22,8 @@ class OneDarkProTheme implements ThemeInterface {
   Color get cyan => const Color(0xFF56B6C2);
   @override
   Color get white => const Color(0xFFABB2BF);
+  @override
+  Color get grey => const Color(0xFFABB2BF);
 
   @override
   ThemeData get themeData => ThemeData(

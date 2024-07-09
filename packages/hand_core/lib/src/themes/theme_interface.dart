@@ -11,5 +11,6 @@ abstract class ThemeInterface {
   Color get magenta;
   Color get cyan;
   Color get white;
+  Color get grey;
   ThemeData get themeData;
 }
