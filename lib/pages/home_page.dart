@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
         controller: _pageController,
         children: <Widget>[
           Container(color: Colors.red),
-          LogMonitorPage(), // LogMonitorPage
+          const LogMonitorPage(), // LogMonitorPage
         ],
       ),
       // BottomNavigationBar for page navigation

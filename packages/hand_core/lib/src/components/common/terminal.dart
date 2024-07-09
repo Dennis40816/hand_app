@@ -15,6 +15,7 @@ class Terminal<T extends TerminalController> extends StatefulWidget {
 class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   final ScrollController _scrollController = ScrollController();
   bool _shouldAutoScroll = true;
+  bool _isExpanded = false;
 
   TextSpan _applyFontSize(TextSpan originalTextSpan, double fontSize) {
     return TextSpan(
@@ -27,6 +28,20 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
         }
         return child;
       }).toList(),
+    );
+  }
+
+  void _toggleExpand() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
     );
   }
 
@@ -64,18 +79,59 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
           child: Container(
             color:
                 widget.theme.background, // Set background to theme background
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: terminalController.terminalData.textSpanList.length,
-              itemBuilder: (context, index) {
-                // Use the method to overwrite the fontSize while keeping other styles
-                return SelectableText.rich(
-                  _applyFontSize(
-                    terminalController.terminalData.textSpanList[index],
-                    terminalController.fontSize,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: Icon(_isExpanded
+                          ? Icons.fullscreen_exit
+                          : Icons.fullscreen),
+                      onPressed: _toggleExpand,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.text_increase),
+                      onPressed: () {
+                        terminalController
+                            .updateFontSize(terminalController.fontSize + 1);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.text_decrease),
+                      onPressed: () {
+                        terminalController
+                            .updateFontSize(terminalController.fontSize - 1);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_downward),
+                      onPressed: _scrollToBottom,
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: SizedBox(
+                    height: _isExpanded
+                        ? double.infinity
+                        : MediaQuery.of(context).size.height * 0.4,
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount:
+                          terminalController.terminalData.textSpanList.length,
+                      itemBuilder: (context, index) {
+                        // Use the method to overwrite the fontSize while keeping other styles
+                        return SelectableText.rich(
+                          _applyFontSize(
+                            terminalController.terminalData.textSpanList[index],
+                            terminalController.fontSize,
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
         );
