@@ -16,6 +16,13 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   bool _shouldAutoScroll = true;
   bool _isExpanded = false;
 
+  static const double minChildSizeValue = 0.3;
+  static const double maxChildSizeValue = 1.0;
+
+  double _minChildSize = minChildSizeValue;
+  double _currentChildSize = minChildSizeValue;
+  double _maxChildSize = maxChildSizeValue;
+
   TextSpan _applyFontSize(TextSpan originalTextSpan, double fontSize) {
     return TextSpan(
       text: originalTextSpan.text,
@@ -30,11 +37,17 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
     );
   }
 
+  /// TODO: Change _current, _min, _max child size when drag
+
   void _toggleExpand() {
     setState(() {
       _isExpanded = !_isExpanded;
-      // 更新 DraggableScrollableSheet 的大小
-      DraggableScrollableActuator.reset(context);
+
+      if (_isExpanded) {
+        _currentChildSize = _maxChildSize;
+      } else {
+        _currentChildSize = _minChildSize;
+      }
     });
   }
 
@@ -56,9 +69,9 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
           return Theme(
             data: widget.theme.themeData,
             child: DraggableScrollableSheet(
-              initialChildSize: _isExpanded ? 1.0 : 0.3,
-              minChildSize: 0.1,
-              maxChildSize: 1.0,
+              initialChildSize: _currentChildSize,
+              minChildSize: _minChildSize,
+              maxChildSize: _maxChildSize,
               builder: (context, sheetScrollController) {
                 sheetScrollController.addListener(() {
                   if (sheetScrollController.position.pixels ==
@@ -92,6 +105,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                                 ? Icons.fullscreen_exit
                                 : Icons.fullscreen),
                             onPressed: _toggleExpand,
+                            tooltip: _isExpanded ? 'Expand' : 'Collapse',
                           ),
                           IconButton(
                             icon: const Icon(Icons.text_increase),
@@ -99,6 +113,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                               terminalController.updateFontSize(
                                   terminalController.fontSize + 1);
                             },
+                            tooltip: 'Increase Font Size',
                           ),
                           IconButton(
                             icon: const Icon(Icons.text_decrease),
@@ -106,12 +121,21 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                               terminalController.updateFontSize(
                                   terminalController.fontSize - 1);
                             },
+                            tooltip: 'Decrease Font Size',
                           ),
                           IconButton(
                             icon: const Icon(Icons.arrow_downward),
                             onPressed: () =>
                                 _scrollToBottom(sheetScrollController),
+                            tooltip: 'Scroll to Bottom',
                           ),
+                          IconButton(
+                            icon: const Icon(Icons.playlist_remove),
+                            onPressed: () => terminalController.clear(),
+                            tooltip: 'Clear all data',
+                          ),
+
+                          /// TODO: add clear button
                         ],
                       ),
                       Expanded(
