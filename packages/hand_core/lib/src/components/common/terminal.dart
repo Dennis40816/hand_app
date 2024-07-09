@@ -13,7 +13,6 @@ class Terminal<T extends TerminalController> extends StatefulWidget {
 }
 
 class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
-  final ScrollController _scrollController = ScrollController();
   bool _shouldAutoScroll = true;
   bool _isExpanded = false;
 
@@ -34,108 +33,112 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   void _toggleExpand() {
     setState(() {
       _isExpanded = !_isExpanded;
+      // 更新 DraggableScrollableSheet 的大小
+      DraggableScrollableActuator.reset(context);
     });
   }
 
-  void _scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    /// add auto scroll state listener
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        _shouldAutoScroll = true;
-      } else {
-        _shouldAutoScroll = false;
-      }
-    });
+  void _scrollToBottom(ScrollController scrollController) {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<T>(
-      builder: (context, terminalController, child) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_shouldAutoScroll) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-            );
-          }
-        });
+    return DraggableScrollableActuator(
+      child: Consumer<T>(
+        builder: (context, terminalController, child) {
+          return Theme(
+            data: widget.theme.themeData,
+            child: DraggableScrollableSheet(
+              initialChildSize: _isExpanded ? 1.0 : 0.3,
+              minChildSize: 0.1,
+              maxChildSize: 1.0,
+              builder: (context, sheetScrollController) {
+                sheetScrollController.addListener(() {
+                  if (sheetScrollController.position.pixels ==
+                      sheetScrollController.position.maxScrollExtent) {
+                    _shouldAutoScroll = true;
+                  } else {
+                    _shouldAutoScroll = false;
+                  }
+                });
 
-        return Theme(
-          data: widget.theme.themeData,
-          child: Container(
-            color:
-                widget.theme.background, // Set background to theme background
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: Icon(_isExpanded
-                          ? Icons.fullscreen_exit
-                          : Icons.fullscreen),
-                      onPressed: _toggleExpand,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.text_increase),
-                      onPressed: () {
-                        terminalController
-                            .updateFontSize(terminalController.fontSize + 1);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.text_decrease),
-                      onPressed: () {
-                        terminalController
-                            .updateFontSize(terminalController.fontSize - 1);
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_downward),
-                      onPressed: _scrollToBottom,
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: _isExpanded
-                        ? double.infinity
-                        : MediaQuery.of(context).size.height * 0.4,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount:
-                          terminalController.terminalData.textSpanList.length,
-                      itemBuilder: (context, index) {
-                        // Use the method to overwrite the fontSize while keeping other styles
-                        return SelectableText.rich(
-                          _applyFontSize(
-                            terminalController.terminalData.textSpanList[index],
-                            terminalController.fontSize,
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_shouldAutoScroll && sheetScrollController.hasClients) {
+                    sheetScrollController.animateTo(
+                      sheetScrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                });
+
+                return Container(
+                  color: widget
+                      .theme.background, // Set background to theme background
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: Icon(_isExpanded
+                                ? Icons.fullscreen_exit
+                                : Icons.fullscreen),
+                            onPressed: _toggleExpand,
                           ),
-                        );
-                      },
-                    ),
+                          IconButton(
+                            icon: const Icon(Icons.text_increase),
+                            onPressed: () {
+                              terminalController.updateFontSize(
+                                  terminalController.fontSize + 1);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.text_decrease),
+                            onPressed: () {
+                              terminalController.updateFontSize(
+                                  terminalController.fontSize - 1);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_downward),
+                            onPressed: () =>
+                                _scrollToBottom(sheetScrollController),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: sheetScrollController,
+                          itemCount: terminalController
+                              .terminalData.textSpanList.length,
+                          itemBuilder: (context, index) {
+                            // Use the method to overwrite the fontSize while keeping other styles
+                            return SelectableText.rich(
+                              _applyFontSize(
+                                terminalController
+                                    .terminalData.textSpanList[index],
+                                terminalController.fontSize,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
