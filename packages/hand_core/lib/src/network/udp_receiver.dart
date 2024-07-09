@@ -8,6 +8,7 @@ class UdpReceiver {
 
   UdpReceiver(this.port);
 
+  /// Starts listening for incoming UDP packets.
   void startListening() async {
     _socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
     _socket?.listen((event) {
@@ -20,10 +21,12 @@ class UdpReceiver {
     });
   }
 
+  /// Stops listening for incoming UDP packets.
   void stopListening() {
     _socket?.close();
     _socket = null;
   }
 
+  /// Stream of incoming data.
   Stream<String> get onData => _controller.stream;
 }

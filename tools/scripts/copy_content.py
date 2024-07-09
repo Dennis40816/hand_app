@@ -1,7 +1,7 @@
 """
 給 chatgpt 的提示詞:
-接下來我將傳入最新版本的程式，格式的開頭是路徑以 ## related_path ## 包裹，剩下的則是程式，
-程式結束會添加一行 "======================="。 請你加入英文 comment，要盡可能清楚扼要。讓我們開始吧。
+接下來我將傳入最新版本的程式，格式的開頭是路徑以 ## related_path ## 包裹，剩下的則是程式，程式結束會添加一行 "======================="。 
+請你加入英文 comment，順便更新你目前的程式，避免未來要加入新功能時出現錯誤。要盡可能清楚扼要。讓我們開始吧。
 """
 
 """
@@ -11,7 +11,7 @@ import os
 import argparse
 from pathlib import Path
 
-"""
+'''
 Usage: This Python script is designed to quickly consolidate specified programs for ChatGPT.
 Input: 
     - default: Provide relative paths relative to APP_DIR (multiple files separated by spaces)
@@ -25,8 +25,7 @@ python copy_content.py data/file1.txt data/file2.txt more_data/another_file.txt 
 python copy_content.py -i /project/input_files/paths.txt
 python copy_content.py -i /project/input_files/paths.txt -f output.txt
 python copy_content.py -i /project/input_files/paths.txt -f # will output to output.txt
-"""
-
+'''
 # Define APP_DIR as the ../../ path relative to the script file location
 APP_DIR = Path(__file__).resolve().parent.parent.parent
 print(' ')

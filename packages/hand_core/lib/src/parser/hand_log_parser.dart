@@ -3,11 +3,13 @@ import '../models/hand/hand_log_message.dart';
 class HandLogParser {
   HandLogParser();
 
+  /// Removes ANSI escape codes from the log string.
   String removeAnsiCodes(String log) {
     final ansiEscapeCodes = RegExp(r'\x1B\[[0-?]*[ -/]*[@-~]');
     return log.replaceAll(ansiEscapeCodes, '');
   }
 
+  /// Parses a log string into a HandLogMessage.
   HandLogMessage parseLog(String log) {
     String cleanedLog = removeAnsiCodes(log);
 
@@ -36,6 +38,7 @@ class HandLogParser {
     }
   }
 
+  /// Parses the log level from the log string.
   HandLogLevel parseLogLevel(String log) {
     if (log.startsWith('E')) {
       return HandLogLevel.error;

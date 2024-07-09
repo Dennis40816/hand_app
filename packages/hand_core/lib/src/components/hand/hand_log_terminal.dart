@@ -13,6 +13,7 @@ class HandLogTerminal extends StatefulWidget {
 
   const HandLogTerminal.withTheme(this.theme, {super.key});
 
+  /// Returns the TextStyle for the given log level.
   TextStyle getStyle(HandLogLevel level) {
     switch (level) {
       case HandLogLevel.error:
@@ -41,6 +42,8 @@ class _HandLogTerminalState extends State<HandLogTerminal> {
       final controller =
           Provider.of<HandLogTerminalController>(context, listen: false);
       controller.setGetStyleFunction(widget.getStyle);
+
+      /// where we start our udp receiver
       controller.startUdpReceiver();
     });
   }

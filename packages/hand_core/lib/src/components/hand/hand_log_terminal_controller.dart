@@ -6,8 +6,6 @@ import '../common/terminal_controller.dart';
 
 import 'package:logger/logger.dart';
 
-var logger = Logger();
-
 class HandLogTerminalController extends TerminalController {
   final UdpReceiver udpReceiver;
   final HandLogParser logParser = HandLogParser();
@@ -16,6 +14,7 @@ class HandLogTerminalController extends TerminalController {
 
   HandLogTerminalController(this.udpReceiver);
 
+  /// Translates messages in the queue to TextSpans and notifies listeners.
   void translateMessages() {
     List<TextSpan> newSpans = [];
     for (var message in messageQueue) {
@@ -27,29 +26,33 @@ class HandLogTerminalController extends TerminalController {
     notifyListeners();
   }
 
+  /// Starts the UDP receiver and listens for incoming messages.
   void startUdpReceiver() {
     udpReceiver.startListening();
     udpReceiver.onData.listen((data) {
       HandLogMessage message = logParser.parseLog(data);
       messageQueue.add(message);
       translateMessages();
-      logger.d("Logger is working!");
       notifyListeners();
     });
   }
 
+  /// Stops the UDP receiver.
   void stopUdpReceiver() {
     udpReceiver.stopListening();
   }
 
+  /// Returns the current list of messages in the queue.
   List<HandLogMessage> getMessages() {
     return messageQueue;
   }
 
+  /// Clears the message queue.
   void clearMessages() {
     messageQueue.clear();
   }
 
+  /// Sets the function to get the TextStyle for each log level.
   void setGetStyleFunction(TextStyle Function(HandLogLevel) styleFunction) {
     getStyle = styleFunction;
   }

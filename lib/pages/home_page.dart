@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // PageView for switching between pages
       body: PageView(
         controller: _pageController,
         children: <Widget>[
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
           LogMonitorPage(), // LogMonitorPage
         ],
       ),
+      // BottomNavigationBar for page navigation
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
