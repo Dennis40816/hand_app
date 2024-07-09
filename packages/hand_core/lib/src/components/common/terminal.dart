@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'terminal_controller.dart';
 import '../../themes/theme_interface.dart';
@@ -57,46 +58,79 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableActuator(
-      child: Consumer<T>(
-        builder: (context, terminalController, child) {
-          return Theme(
-            data: widget.theme.themeData,
-            child: DraggableScrollableSheet(
-              initialChildSize: _currentChildSize,
-              minChildSize: _minChildSize,
-              maxChildSize: _maxChildSize,
-              builder: (context, sheetScrollController) {
-                _scrollController.addListener(() {
-                  _shouldAutoScroll = _scrollController.position.pixels ==
-                      _scrollController.position.maxScrollExtent;
-                });
-
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_shouldAutoScroll && _scrollController.hasClients) {
-                    _scrollController.animateTo(
-                      _scrollController.position.maxScrollExtent,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                    );
-                  }
-                });
-
-                return Container(
-                  color: widget.theme.background,
-                  child: Column(
-                    children: [
-                      _buildTerminalToolbar(context, terminalController),
-                      _buildTerminalOutput(terminalController),
-                    ],
-                  ),
-                );
-              },
-            ),
-          );
+    return Shortcuts(
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.equal):
+            const IncreaseFontSizeIntent(),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.minus):
+            const DecreaseFontSizeIntent(),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.backquote):
+            const ToggleExpandIntent(),
+      },
+      child: Actions(
+        actions: <Type, Action<Intent>>{
+          IncreaseFontSizeIntent: CallbackAction<IncreaseFontSizeIntent>(
+            onInvoke: (IncreaseFontSizeIntent intent) => _increaseFontSize(),
+          ),
+          DecreaseFontSizeIntent: CallbackAction<DecreaseFontSizeIntent>(
+            onInvoke: (DecreaseFontSizeIntent intent) => _decreaseFontSize(),
+          ),
+          ToggleExpandIntent: CallbackAction<ToggleExpandIntent>(
+            onInvoke: (ToggleExpandIntent intent) => _toggleExpand(),
+          ),
         },
+        child: DraggableScrollableActuator(
+          child: Consumer<T>(
+            builder: (context, terminalController, child) {
+              return Theme(
+                data: widget.theme.themeData,
+                child: DraggableScrollableSheet(
+                  initialChildSize: _currentChildSize,
+                  minChildSize: _minChildSize,
+                  maxChildSize: _maxChildSize,
+                  builder: (context, sheetScrollController) {
+                    _scrollController.addListener(() {
+                      _shouldAutoScroll = _scrollController.position.pixels ==
+                          _scrollController.position.maxScrollExtent;
+                    });
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_shouldAutoScroll && _scrollController.hasClients) {
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    });
+
+                    return Container(
+                      color: widget.theme.background,
+                      child: Column(
+                        children: [
+                          _buildTerminalToolbar(context, terminalController),
+                          _buildTerminalOutput(terminalController),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
+  }
+
+  void _increaseFontSize() {
+    final terminalController = context.read<T>();
+    terminalController.updateFontSize(terminalController.fontSize + 1);
+  }
+
+  void _decreaseFontSize() {
+    final terminalController = context.read<T>();
+    terminalController.updateFontSize(terminalController.fontSize - 1);
   }
 
   Widget _buildTerminalToolbar(BuildContext context, T terminalController) {
@@ -110,16 +144,12 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
         ),
         IconButton(
           icon: const Icon(Icons.text_increase),
-          onPressed: () {
-            terminalController.updateFontSize(terminalController.fontSize + 1);
-          },
+          onPressed: _increaseFontSize,
           tooltip: 'Increase Font Size',
         ),
         IconButton(
           icon: const Icon(Icons.text_decrease),
-          onPressed: () {
-            terminalController.updateFontSize(terminalController.fontSize - 1);
-          },
+          onPressed: _decreaseFontSize,
           tooltip: 'Decrease Font Size',
         ),
         IconButton(
@@ -152,4 +182,16 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
       ),
     );
   }
+}
+
+class IncreaseFontSizeIntent extends Intent {
+  const IncreaseFontSizeIntent();
+}
+
+class DecreaseFontSizeIntent extends Intent {
+  const DecreaseFontSizeIntent();
+}
+
+class ToggleExpandIntent extends Intent {
+  const ToggleExpandIntent();
 }
