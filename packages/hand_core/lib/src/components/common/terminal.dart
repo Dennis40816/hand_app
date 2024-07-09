@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'terminal_controller.dart';
 import '../../themes/theme_interface.dart';
@@ -13,6 +15,7 @@ class Terminal<T extends TerminalController> extends StatefulWidget {
 }
 
 class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
+  ScrollController _scrollController = ScrollController();
   bool _shouldAutoScroll = true;
   bool _isExpanded = false;
 
@@ -61,6 +64,22 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
     }
   }
 
+  bool get _isOnDesktopAndWeb {
+    if (kIsWeb) {
+      return true;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return false;
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableActuator(
@@ -73,9 +92,9 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
               minChildSize: _minChildSize,
               maxChildSize: _maxChildSize,
               builder: (context, sheetScrollController) {
-                sheetScrollController.addListener(() {
-                  if (sheetScrollController.position.pixels ==
-                      sheetScrollController.position.maxScrollExtent) {
+                _scrollController.addListener(() {
+                  if (_scrollController.position.pixels ==
+                      _scrollController.position.maxScrollExtent) {
                     _shouldAutoScroll = true;
                   } else {
                     _shouldAutoScroll = false;
@@ -83,9 +102,9 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                 });
 
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_shouldAutoScroll && sheetScrollController.hasClients) {
-                    sheetScrollController.animateTo(
-                      sheetScrollController.position.maxScrollExtent,
+                  if (_shouldAutoScroll && _scrollController.hasClients) {
+                    _scrollController.animateTo(
+                      _scrollController.position.maxScrollExtent,
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOut,
                     );
@@ -125,8 +144,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.arrow_downward),
-                            onPressed: () =>
-                                _scrollToBottom(sheetScrollController),
+                            onPressed: () => _scrollToBottom(_scrollController),
                             tooltip: 'Scroll to Bottom',
                           ),
                           IconButton(
@@ -134,13 +152,13 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                             onPressed: () => terminalController.clear(),
                             tooltip: 'Clear all data',
                           ),
-
-                          /// TODO: add clear button
                         ],
                       ),
                       Expanded(
                         child: ListView.builder(
-                          controller: sheetScrollController,
+                          /// Resolve the issue where two-finger scrolling on a touchpad causes the
+                          /// terminal's expanded controller to crash.
+                          controller: _scrollController,
                           itemCount: terminalController
                               .terminalData.textSpanList.length,
                           itemBuilder: (context, index) {
