@@ -13,6 +13,9 @@ class Terminal<T extends TerminalController> extends StatefulWidget {
 }
 
 class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
+  final ScrollController _scrollController = ScrollController();
+  bool _shouldAutoScroll = true;
+
   TextSpan _applyFontSize(TextSpan originalTextSpan, double fontSize) {
     return TextSpan(
       text: originalTextSpan.text,
@@ -28,15 +31,41 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    /// add auto scroll state listener
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _shouldAutoScroll = true;
+      } else {
+        _shouldAutoScroll = false;
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<T>(
       builder: (context, terminalController, child) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_shouldAutoScroll) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+
         return Theme(
           data: widget.theme.themeData,
           child: Container(
             color:
                 widget.theme.background, // Set background to theme background
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: terminalController.terminalData.textSpanList.length,
               itemBuilder: (context, index) {
                 // Use the method to overwrite the fontSize while keeping other styles
