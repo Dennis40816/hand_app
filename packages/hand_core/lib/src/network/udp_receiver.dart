@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-class UdpReceiver {
+class UdpTransceiver {
   final int port;
   RawDatagramSocket? _socket;
   final StreamController<String> _controller = StreamController<String>();
 
-  UdpReceiver(this.port);
+  UdpTransceiver({required this.port});
 
   /// Starts listening for incoming UDP packets.
   void startListening() async {
@@ -25,6 +25,11 @@ class UdpReceiver {
   void stopListening() {
     _socket?.close();
     _socket = null;
+  }
+
+  /// Sends a UDP packet to the specified address and port.
+  void send(String message, InternetAddress address, int port) {
+    _socket?.send(message.codeUnits, address, port);
   }
 
   /// Stream of incoming data.

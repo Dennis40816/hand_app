@@ -1,18 +1,37 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../network/udp_receiver.dart';
 import '../../parser/hand_log_parser.dart';
 import '../../models/hand/hand_log_message.dart';
 import '../common/terminal_controller.dart';
 
-import 'package:logger/logger.dart';
+import '../../../globals.dart' as globals;
 
 class HandLogTerminalController extends TerminalController {
-  final UdpReceiver udpReceiver;
+  final UdpTransceiver udpTransceiver;
   final HandLogParser logParser = HandLogParser();
   List<HandLogMessage> messageQueue = [];
   late TextStyle Function(HandLogLevel) getStyle;
 
-  HandLogTerminalController(this.udpReceiver);
+  HandLogTerminalController(this.udpTransceiver);
+
+  /// Overrides function
+  @override
+  void addTerminalInput(TextSpan textSpan) {
+    super.addTerminalInput(textSpan);
+    if (textSpan.text == null) {
+      globals.logger.e("text should never be null");
+      return;
+    }
+
+    /// remove prefix
+
+    /// TODO: transmit through udp
+    /// globals.logger.d("TODO: transmit to HAND MAIN through given transmitter");
+    udpTransceiver.send(
+        textSpan.text!, InternetAddress("192.168.1.114"), 12345);
+  }
 
   /// Translates messages in the queue to TextSpans and notifies listeners.
   void translateMessages() {
@@ -28,8 +47,8 @@ class HandLogTerminalController extends TerminalController {
 
   /// Starts the UDP receiver and listens for incoming messages.
   void startUdpReceiver() {
-    udpReceiver.startListening();
-    udpReceiver.onData.listen((data) {
+    udpTransceiver.startListening();
+    udpTransceiver.onData.listen((data) {
       HandLogMessage message = logParser.parseLog(data);
       messageQueue.add(message);
       translateMessages();
@@ -39,7 +58,7 @@ class HandLogTerminalController extends TerminalController {
 
   /// Stops the UDP receiver.
   void stopUdpReceiver() {
-    udpReceiver.stopListening();
+    udpTransceiver.stopListening();
   }
 
   /// Returns the current list of messages in the queue.

@@ -14,7 +14,7 @@ class _LogMonitorPageState extends State<LogMonitorPage> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       // Providing HandLogTerminalController to the widget tree
-      create: (_) => HandLogTerminalController(UdpReceiver(12345)),
+      create: (_) => HandLogTerminalController(UdpTransceiver(port: 12345)),
       child: Scaffold(
         appBar: AppBar(title: const Text('Log Monitor')),
         body: Consumer<HandLogTerminalController>(
