@@ -11,6 +11,11 @@ class TerminalController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Can be override if user input should transmit through other component
+  void addTerminalInput(TextSpan textSpan) {
+    addTextSpan(textSpan);
+  }
+
   /// Add a new TextSpan List to the list and notifies listeners.
   void addTextSpanList(List<TextSpan> list) {
     terminalData.data.addAll(list);

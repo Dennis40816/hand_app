@@ -14,6 +14,7 @@ dependencies:
   fixnum: ^1.1.0
   logger: ^2.3.0
   provider: ^6.1.2
+  assorted_layout_widgets: ^9.0.2
   
 dev_dependencies:
   flutter_test:

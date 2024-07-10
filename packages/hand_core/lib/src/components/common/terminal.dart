@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'terminal_controller.dart';
+import 'terminal_input.dart';
 import '../../themes/theme_interface.dart';
+
+import '../../../globals.dart' as globals;
 
 class Terminal<T extends TerminalController> extends StatefulWidget {
   final ThemeInterface theme;
@@ -18,7 +21,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   bool _shouldAutoScroll = true;
   bool _isExpanded = false;
 
-  static const double _minChildSizeValue = 0.3;
+  static const double _minChildSizeValue = 0.4;
   static const double _maxChildSizeValue = 1.0;
 
   double _minChildSize = _minChildSizeValue;
@@ -110,6 +113,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                         children: [
                           _buildTerminalToolbar(context, terminalController),
                           _buildTerminalOutput(terminalController),
+                          TerminalInput<T>(theme: widget.theme),
                         ],
                       ),
                     );
@@ -168,17 +172,20 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
 
   Widget _buildTerminalOutput(T terminalController) {
     return Expanded(
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: terminalController.terminalData.length,
-        itemBuilder: (context, index) {
-          return SelectableText.rich(
-            _applyFontSize(
-              terminalController.terminalData.data[index],
-              terminalController.fontSize,
-            ),
-          );
-        },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: ListView.builder(
+          controller: _scrollController,
+          itemCount: terminalController.terminalData.length,
+          itemBuilder: (context, index) {
+            return SelectableText.rich(
+              _applyFontSize(
+                terminalController.terminalData.data[index],
+                terminalController.fontSize,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
