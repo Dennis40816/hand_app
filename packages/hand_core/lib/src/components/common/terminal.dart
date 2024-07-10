@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/rendering.dart';
 import 'terminal_controller.dart';
 import 'terminal_input.dart';
 import '../../themes/theme_interface.dart';
@@ -20,6 +21,8 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   final ScrollController _scrollController = ScrollController();
   bool _shouldAutoScroll = true;
   bool _isExpanded = false;
+  bool _isScrollToBottomAction = false;
+  ScrollDirection _lastScrollDirection = ScrollDirection.idle;
 
   static const double _minChildSizeValue = 0.4;
   static const double _maxChildSizeValue = 1.0;
@@ -51,11 +54,21 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
+      setState(() {
+        _isScrollToBottomAction = true;
+      });
+      _scrollController
+          .animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-      );
+      )
+          .then((_) {
+        setState(() {
+          _isScrollToBottomAction = false;
+          _shouldAutoScroll = true;
+        });
+      });
     }
   }
 
@@ -92,11 +105,6 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                   minChildSize: _minChildSize,
                   maxChildSize: _maxChildSize,
                   builder: (context, sheetScrollController) {
-                    _scrollController.addListener(() {
-                      _shouldAutoScroll = _scrollController.position.pixels ==
-                          _scrollController.position.maxScrollExtent;
-                    });
-
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (_shouldAutoScroll && _scrollController.hasClients) {
                         _scrollController.animateTo(
@@ -107,14 +115,42 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                       }
                     });
 
-                    return Container(
-                      color: widget.theme.background,
-                      child: Column(
-                        children: [
-                          _buildTerminalToolbar(context, terminalController),
-                          _buildTerminalOutput(terminalController),
-                          TerminalInput<T>(theme: widget.theme),
-                        ],
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: (scrollNotification) {
+                        if (_isScrollToBottomAction) {
+                          return true;
+                        }
+                        if (scrollNotification is UserScrollNotification) {
+                          if (scrollNotification.direction ==
+                              ScrollDirection.forward) {
+                            /// cancel _shouldAutoScroll if moving forward
+                            _shouldAutoScroll = false;
+                          } else if (scrollNotification.direction ==
+                              ScrollDirection.idle) {
+                            /// idle
+                            if (_lastScrollDirection ==
+                                    ScrollDirection.reverse &&
+                                _scrollController.position.pixels ==
+                                    _scrollController
+                                        .position.maxScrollExtent) {
+                              _shouldAutoScroll = true;
+                            }
+                          }
+
+                          /// update _lastScrollDirection
+                          _lastScrollDirection = scrollNotification.direction;
+                        }
+                        return true;
+                      },
+                      child: Container(
+                        color: widget.theme.background,
+                        child: Column(
+                          children: [
+                            _buildTerminalToolbar(context, terminalController),
+                            _buildTerminalOutput(terminalController),
+                            TerminalInput<T>(theme: widget.theme),
+                          ],
+                        ),
                       ),
                     );
                   },

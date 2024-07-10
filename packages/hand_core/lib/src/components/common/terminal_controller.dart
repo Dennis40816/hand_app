@@ -13,6 +13,7 @@ class TerminalController extends ChangeNotifier {
 
   /// Can be override if user input should transmit through other component
   void addTerminalInput(TextSpan textSpan) {
+    /// TODO: should update _shouldAutoScroll
     addTextSpan(textSpan);
   }
 
