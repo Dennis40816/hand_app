@@ -18,9 +18,10 @@ class Terminal<T extends TerminalController> extends StatefulWidget {
 }
 
 class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
-  final ScrollController _scrollController = ScrollController();
-  bool _shouldAutoScroll = true;
   bool _isExpanded = false;
+
+  /// terminal internal state
+  final ScrollController _scrollController = ScrollController();
   bool _isScrollToBottomAction = false;
   ScrollDirection _lastScrollDirection = ScrollDirection.idle;
 
@@ -64,9 +65,10 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
         curve: Curves.easeOut,
       )
           .then((_) {
+        final terminalController = context.read<T>();
         setState(() {
           _isScrollToBottomAction = false;
-          _shouldAutoScroll = true;
+          terminalController.setShouldAutoScroll(true);
         });
       });
     }
@@ -106,7 +108,8 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                   maxChildSize: _maxChildSize,
                   builder: (context, sheetScrollController) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_shouldAutoScroll && _scrollController.hasClients) {
+                      if (terminalController.shouldAutoScroll &&
+                          _scrollController.hasClients) {
                         _scrollController.animateTo(
                           _scrollController.position.maxScrollExtent,
                           duration: const Duration(milliseconds: 200),
@@ -123,8 +126,8 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                         if (scrollNotification is UserScrollNotification) {
                           if (scrollNotification.direction ==
                               ScrollDirection.forward) {
-                            /// cancel _shouldAutoScroll if moving forward
-                            _shouldAutoScroll = false;
+                            /// cancel shouldAutoScroll if moving forward
+                            terminalController.setShouldAutoScroll(false);
                           } else if (scrollNotification.direction ==
                               ScrollDirection.idle) {
                             /// idle
@@ -133,7 +136,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                                 _scrollController.position.pixels ==
                                     _scrollController
                                         .position.maxScrollExtent) {
-                              _shouldAutoScroll = true;
+                              terminalController.setShouldAutoScroll(true);
                             }
                           }
 

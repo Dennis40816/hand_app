@@ -3,7 +3,19 @@ import '../../models/common/terminal_data.dart';
 
 class TerminalController extends ChangeNotifier {
   final TerminalData terminalData = TerminalData(textSpanList: []);
+
+  /// States maintain
   double fontSize = 18.0;
+  bool _shouldAutoScroll = true;
+
+  bool get shouldAutoScroll => _shouldAutoScroll;
+
+  void setShouldAutoScroll(bool value) {
+    if (_shouldAutoScroll != value) {
+      _shouldAutoScroll = value;
+      notifyListeners();
+    }
+  }
 
   /// Adds a new TextSpan to the list and notifies listeners.
   void addTextSpan(TextSpan textSpan) {
@@ -13,7 +25,8 @@ class TerminalController extends ChangeNotifier {
 
   /// Can be override if user input should transmit through other component
   void addTerminalInput(TextSpan textSpan) {
-    /// TODO: should update _shouldAutoScroll
+    // Activate auto scroll when user input new data
+    setShouldAutoScroll(true);
     addTextSpan(textSpan);
   }
 
