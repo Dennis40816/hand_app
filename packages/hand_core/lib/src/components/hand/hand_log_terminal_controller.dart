@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import '../../network/udp_receiver.dart';
@@ -9,9 +10,20 @@ import '../common/terminal_controller.dart';
 import '../../../globals.dart' as globals;
 
 class HandLogTerminalController extends TerminalController {
+  /// UDP related
   final UdpTransceiver udpTransceiver;
+  StreamSubscription? _subscription;
+
+  // TODO: Ensure these two values are reset together when the UI checkbox
+  // becomes available for the user during state changes
+  bool _stopUdpTransceiverWhenExit = false;
+  bool _needStartListen = true;
+
+  /// HAND log parser
   final HandLogParser logParser = HandLogParser();
   List<HandLogMessage> messageQueue = [];
+
+  /// output style
   late TextStyle Function(HandLogLevel) getStyle;
 
   HandLogTerminalController(this.udpTransceiver);
@@ -25,10 +37,7 @@ class HandLogTerminalController extends TerminalController {
       return;
     }
 
-    /// remove prefix
-
-    /// TODO: transmit through udp
-    /// globals.logger.d("TODO: transmit to HAND MAIN through given transmitter");
+    /// TODO: remove prefix
     udpTransceiver.send(
         textSpan.text!, InternetAddress("192.168.1.114"), 12345);
   }
@@ -41,24 +50,34 @@ class HandLogTerminalController extends TerminalController {
           TextSpan(text: message.toString(), style: getStyle(message.level)));
     }
     messageQueue.clear();
+
+    // This will call notifyListeners();
     addTextSpanList(newSpans);
-    // notifyListeners();
   }
 
   /// Starts the UDP receiver and listens for incoming messages.
-  void startUdpReceiver() {
-    udpTransceiver.startListening();
-    udpTransceiver.onData.listen((data) {
-      HandLogMessage message = logParser.parseLog(data);
-      messageQueue.add(message);
-      translateMessages();
-      notifyListeners();
-    });
+  Future<void> startUdpReceiver() async {
+    if (_needStartListen) {
+      await udpTransceiver.startListening();
+      _subscription = udpTransceiver.onData.listen((data) {
+        HandLogMessage message = logParser.parseLog(data);
+        messageQueue.add(message);
+        translateMessages();
+        notifyListeners();
+      });
+
+      _needStartListen = false;
+    }
   }
 
   /// Stops the UDP receiver.
-  void stopUdpReceiver() {
-    udpTransceiver.stopListening();
+  Future<void> stopUdpReceiver() async {
+    if (_stopUdpTransceiverWhenExit) {
+      await udpTransceiver.stopListening();
+      _subscription?.cancel();
+
+      _needStartListen = true;
+    }
   }
 
   /// Returns the current list of messages in the queue.

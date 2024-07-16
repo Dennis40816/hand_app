@@ -12,16 +12,12 @@ class LogMonitorPage extends StatefulWidget {
 class _LogMonitorPageState extends State<LogMonitorPage> {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      // Providing HandLogTerminalController to the widget tree
-      create: (_) => HandLogTerminalController(UdpTransceiver(port: 12345)),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Log Monitor')),
-        body: Consumer<HandLogTerminalController>(
-          builder: (context, terminalController, child) {
-            return HandLogTerminal.withTheme(OneDarkProTheme());
-          },
-        ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Log Monitor')),
+      body: Consumer<HandLogTerminalController>(
+        builder: (context, terminalController, child) {
+          return HandLogTerminal.withTheme(OneDarkProTheme());
+        },
       ),
     );
   }

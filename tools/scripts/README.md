@@ -2,6 +2,8 @@
 
 Input file example `input_files.txt`:
 ```txt
+## LIB
+
 # components
 packages\hand_core\lib\src\components\common\terminal_controller.dart
 packages\hand_core\lib\src\components\common\terminal.dart
@@ -21,4 +23,9 @@ packages\hand_core\lib\src\parser\hand_log_parser.dart
 # theme
 packages\hand_core\lib\src\themes\one_dark_pro_theme.dart
 packages\hand_core\lib\src\themes\theme_interface.dart
+
+## MAIN
+lib\main.dart
+lib\pages\log_monitor_page.dart
+lib\pages\home_page.dart
 ```

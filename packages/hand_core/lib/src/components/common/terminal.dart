@@ -53,18 +53,21 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
     });
   }
 
+  /// FIXME: fix the duration (dynamic)
+  Future<void> _scrollAnimate() async {
+    return _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 1000),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       setState(() {
         _isScrollToBottomAction = true;
       });
-      _scrollController
-          .animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-      )
-          .then((_) {
+      _scrollAnimate().then((_) {
         final terminalController = context.read<T>();
         setState(() {
           _isScrollToBottomAction = false;
@@ -109,12 +112,9 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
                   builder: (context, sheetScrollController) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (terminalController.shouldAutoScroll &&
-                          _scrollController.hasClients) {
-                        _scrollController.animateTo(
-                          _scrollController.position.maxScrollExtent,
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeOut,
-                        );
+                          _scrollController.hasClients &&
+                          !_isScrollToBottomAction) {
+                        _scrollAnimate();
                       }
                     });
 
