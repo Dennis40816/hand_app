@@ -30,14 +30,13 @@ class HandLogTerminalController extends TerminalController {
 
   /// Overrides function
   @override
-  void addTerminalInput(TextSpan textSpan) {
-    super.addTerminalInput(textSpan);
+  void addTerminalInput(TextSpan textSpan, [String? showPrefix]) {
+    super.addTerminalInput(textSpan, showPrefix);
     if (textSpan.text == null) {
       globals.logger.e("text should never be null");
       return;
     }
 
-    /// TODO: remove prefix
     udpTransceiver.send(
         textSpan.text!, InternetAddress("192.168.1.114"), 12345);
   }

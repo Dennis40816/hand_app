@@ -31,12 +31,12 @@ class _TerminalInputState<T extends TerminalController>
   void _handleSubmit(String input) {
     if (input.isNotEmpty) {
       final textSpan = TextSpan(
-        text: [_prefix, input].join(),
+        text: input,
         style: TextStyle(color: widget.theme.foreground),
       );
 
       /// this function will call notify
-      context.read<T>().addTerminalInput(textSpan);
+      context.read<T>().addTerminalInput(textSpan, _prefix);
 
       /// TODO: Remove this after Implement functionality to navigate through
       /// command history using the up and down arrow keys.

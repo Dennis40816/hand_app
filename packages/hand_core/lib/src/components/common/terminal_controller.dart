@@ -24,10 +24,22 @@ class TerminalController extends ChangeNotifier {
   }
 
   /// Can be override if user input should transmit through other component
-  void addTerminalInput(TextSpan textSpan) {
+  void addTerminalInput(TextSpan textSpan, [String? showPrefix]) {
+    // Get the original text from the provided TextSpan
+    final originalText = textSpan.text ?? '';
+
+    // Combine the prefix (if any) with the original text
+    final combinedText = (showPrefix ?? '') + originalText;
+
+    // Create a new TextSpan with the combined text and the same style as the original
+    final prefixTextSpan = TextSpan(
+      text: combinedText,
+      style: textSpan.style,
+    );
+
     // Activate auto scroll when user input new data
     setShouldAutoScroll(true);
-    addTextSpan(textSpan);
+    addTextSpan(prefixTextSpan);
   }
 
   /// Add a new TextSpan List to the list and notifies listeners.
