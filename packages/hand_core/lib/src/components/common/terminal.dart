@@ -57,7 +57,7 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
   Future<void> _scrollAnimate() async {
     return _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 10),
       curve: Curves.fastOutSlowIn,
     );
   }
@@ -209,18 +209,51 @@ class _TerminalState<T extends TerminalController> extends State<Terminal<T>> {
     );
   }
 
+  // Widget _buildTerminalOutput(T terminalController) {
+  //   return Expanded(
+  //     child: Padding(
+  //       padding: const EdgeInsets.only(left: 8.0),
+  //       child: ListView.builder(
+  //         controller: _scrollController,
+  //         itemCount: terminalController.terminalData.length,
+  //         itemBuilder: (context, index) {
+  //           return SelectableText.rich(
+  //             _applyFontSize(
+  //               terminalController.terminalData.data[index],
+  //               terminalController.fontSize,
+  //             ),
+  //           );
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
+
   Widget _buildTerminalOutput(T terminalController) {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0),
         child: ListView.builder(
           controller: _scrollController,
-          itemCount: terminalController.terminalData.length,
+          itemCount: 1, // We only need one item
           itemBuilder: (context, index) {
             return SelectableText.rich(
-              _applyFontSize(
-                terminalController.terminalData.data[index],
-                terminalController.fontSize,
+              TextSpan(
+                children: [
+                  for (int i = 0;
+                      i < terminalController.terminalData.length;
+                      i++)
+                    TextSpan(
+                      children: [
+                        _applyFontSize(
+                          terminalController.terminalData.data[i],
+                          terminalController.fontSize,
+                        ),
+                        if (i < terminalController.terminalData.length - 1)
+                          const TextSpan(text: '\n'),
+                      ],
+                    ),
+                ],
               ),
             );
           },
