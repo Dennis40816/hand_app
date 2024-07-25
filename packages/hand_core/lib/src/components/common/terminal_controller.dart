@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ip_port_dropdown.dart';
 import '../../models/common/terminal_data.dart';
 
 class TerminalController extends ChangeNotifier {
@@ -7,6 +8,10 @@ class TerminalController extends ChangeNotifier {
   /// States maintain
   double fontSize = 18.0;
   bool _shouldAutoScroll = true;
+
+  /// HAND IpPortDropdown data
+  /// TODO: move to specific terminal instead of here
+  List<IpPort> ipPortList = [];
 
   bool get shouldAutoScroll => _shouldAutoScroll;
 
